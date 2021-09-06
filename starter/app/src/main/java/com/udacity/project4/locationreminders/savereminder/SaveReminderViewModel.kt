@@ -14,12 +14,24 @@ import kotlinx.coroutines.launch
 
 class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSource) :
     BaseViewModel(app) {
-    val reminderTitle = MutableLiveData<String>()
-    val reminderDescription = MutableLiveData<String>()
-    val reminderSelectedLocationStr = MutableLiveData<String>()
-    val selectedPOI = MutableLiveData<PointOfInterest>()
-    val latitude = MutableLiveData<Double>()
-    val longitude = MutableLiveData<Double>()
+
+    val reminderTitle = MutableLiveData<String?>()
+    val reminderDescription = MutableLiveData<String?>()
+    val reminderSelectedLocationStr = MutableLiveData<String?>()
+    val selectedPOI = MutableLiveData<PointOfInterest?>()
+    val latitude = MutableLiveData<Double?>()
+    val longitude = MutableLiveData<Double?>()
+    private val _currentLocationSet = MutableLiveData<Boolean>()
+    val currentLocationSet
+        get() = _currentLocationSet
+
+    init {
+        _currentLocationSet.value = false
+    }
+
+    fun setCurrentLocationObtained(isCurrentLocationObtained: Boolean) {
+        _currentLocationSet.value = isCurrentLocationObtained
+    }
 
     /**
      * Clear the live data objects to start fresh next time the view model gets called
@@ -36,16 +48,22 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
     /**
      * Validate the entered data then saves the reminder data to the DataSource
      */
-    fun validateAndSaveReminder(reminderData: ReminderDataItem) {
-        if (validateEnteredData(reminderData)) {
-            saveReminder(reminderData)
-        }
-    }
+    fun validateAndSaveReminder(reminderData: ReminderDataItem): ReminderDTO? =
+        if (validateEnteredData(reminderData)) saveReminder(reminderData)
+        else null
 
     /**
      * Save the reminder to the data source
      */
-    fun saveReminder(reminderData: ReminderDataItem) {
+    fun saveReminder(reminderData: ReminderDataItem): ReminderDTO {
+        val reminder = ReminderDTO(
+            reminderData.title,
+            reminderData.description,
+            reminderData.location,
+            reminderData.latitude,
+            reminderData.longitude,
+            reminderData.id
+        )
         showLoading.value = true
         viewModelScope.launch {
             dataSource.saveReminder(
@@ -62,12 +80,13 @@ class SaveReminderViewModel(val app: Application, val dataSource: ReminderDataSo
             showToast.value = app.getString(R.string.reminder_saved)
             navigationCommand.value = NavigationCommand.Back
         }
+        return reminder
     }
 
     /**
      * Validate the entered data and show error to the user if there's any invalid data
      */
-    fun validateEnteredData(reminderData: ReminderDataItem): Boolean {
+    private fun validateEnteredData(reminderData: ReminderDataItem): Boolean {
         if (reminderData.title.isNullOrEmpty()) {
             showSnackBarInt.value = R.string.err_enter_title
             return false

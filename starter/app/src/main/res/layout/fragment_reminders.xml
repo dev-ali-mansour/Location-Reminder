@@ -22,7 +22,7 @@
             android:background="@color/white">
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/reminderssRecyclerView"
+                android:id="@+id/remindersRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:liveData="@{viewModel.remindersList}"
@@ -35,11 +35,11 @@
                 android:id="@+id/noDataTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:drawableTop="@drawable/ic_no_data"
                 android:fadeVisible="@{viewModel.showNoData.booleanValue()}"
                 android:gravity="center"
                 android:text="@string/no_data"
                 android:textSize="@dimen/text_size_large"
+                app:drawableTopCompat="@drawable/ic_no_data"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -63,10 +63,12 @@
                 android:layout_margin="@dimen/margin_normal"
                 android:src="@drawable/ic_add"
                 app:fabSize="normal"
-                app:layout_anchor="@id/reminderssRecyclerView"
+                app:layout_anchor="@id/remindersRecyclerView"
                 app:layout_anchorGravity="bottom|right|end"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent" />
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:ignore="SpeakableTextPresentCheck"
+                android:contentDescription="@string/add_reminder_button_description" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 </layout>
