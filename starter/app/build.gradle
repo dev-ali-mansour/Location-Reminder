@@ -124,4 +124,8 @@ dependencies {
     //Maps & Geofencing
     implementation "com.google.android.gms:play-services-location:$playServicesVersion"
     implementation 'com.google.android.gms:play-services-maps:17.0.1'
+
+    //Firebase Authentication
+    implementation platform('com.google.firebase:firebase-bom:28.4.0')
+    implementation 'com.firebaseui:firebase-ui-auth:8.0.0'
 }
