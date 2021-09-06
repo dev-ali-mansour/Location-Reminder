@@ -1,6 +1,5 @@
 package com.udacity.project4
 
-import android.app.Application
 import androidx.multidex.MultiDexApplication
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.local.LocalDB
@@ -36,7 +35,7 @@ class MyApp : MultiDexApplication() {
                     get() as ReminderDataSource
                 )
             }
-            single { RemindersLocalRepository(get()) }
+            single { RemindersLocalRepository(get()) as ReminderDataSource }
             single { LocalDB.createRemindersDao(this@MyApp) }
         }
 
