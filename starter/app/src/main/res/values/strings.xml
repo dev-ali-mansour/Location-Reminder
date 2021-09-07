@@ -41,4 +41,10 @@
     <string name="geofence_too_many_pending_intents">You have provided too many PendingIntents to the addGeofences() call.</string>
     <string name="error_adding_geofence">Error Happened, Can\'t Add Geofence</string>
     <string name="add_reminder_button_description">Add Reminder Button</string>
+    <string name="test_exception_message">Test Exception</string>
+    <string name="empty_list_exception_message">No reminders found</string>
+    <string name="reminder_test_title">Android is awesome</string>
+    <string name="reminder_test_descreiption">Android is an awesome operating system</string>
+    <string name="reminder_test_location">Anywhere</string>
+    <string name="choose_login_method">Choose Login Method</string>
 </resources>

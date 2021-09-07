@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
+import com.firebase.ui.auth.AuthMethodPickerLayout
 import com.firebase.ui.auth.AuthUI
 import com.google.firebase.auth.FirebaseAuth
 import com.udacity.project4.R
@@ -67,15 +68,22 @@ class AuthenticationActivity : AppCompatActivity() {
     }
 
     private fun launchSignInFlow() {
-        val providers =
-            arrayListOf(
-                AuthUI.IdpConfig.EmailBuilder().build(),
-                AuthUI.IdpConfig.GoogleBuilder().build()
-            )
         startForResult.launch(
             AuthUI.getInstance()
                 .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
+                .setAvailableProviders(
+                    listOf(
+                        AuthUI.IdpConfig.EmailBuilder().build(),
+                        AuthUI.IdpConfig.GoogleBuilder().build()
+                    )
+                ).setAuthMethodPickerLayout(
+                    AuthMethodPickerLayout
+                        .Builder(R.layout.layout_auth_ui)
+                        .setGoogleButtonId(R.id.google_sign_in_button)
+                        .setEmailButtonId(R.id.email_sign_in_button)
+                        .build()
+                )
+                .setTheme(R.style.AppTheme)
                 .build()
         )
     }
