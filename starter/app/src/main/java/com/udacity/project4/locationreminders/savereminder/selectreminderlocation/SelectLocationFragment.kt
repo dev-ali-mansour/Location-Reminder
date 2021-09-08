@@ -3,7 +3,6 @@ package com.udacity.project4.locationreminders.savereminder.selectreminderlocati
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.annotation.TargetApi
 import android.content.Intent
 import android.content.IntentSender
 import android.content.pm.PackageManager
@@ -13,7 +12,6 @@ import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.view.*
-import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.navigation.fragment.findNavController
@@ -73,12 +71,15 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     override fun onMapReady(map: GoogleMap) {
-        Log.e(TAG, "OnMapReady()")
+        Log.i(TAG, "OnMapReady()")
         googleMap = map
-        setMapStyle(googleMap)
-        zoomToDeviceLocation()
-        enableMyLocation()
-        pickPOI(googleMap)
+        googleMap.apply {
+            setStyle()
+            zoomToDeviceLocation()
+            enableMyLocation()
+            onPickPOI()
+            onPickCustomLocation()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -110,31 +111,53 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if (requestCode == REQUEST_LOCATION_PERMISSION) {
-            if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                enableMyLocation()
+        runCatching {
+            if (requestCode == REQUEST_LOCATION_PERMISSION) {
+                if (grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    enableMyLocation()
+                } else {
+                    // Should we show an explanation?
+                    if (shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION)) {
+                        Snackbar.make(
+                            binding.mainLayout,
+                            R.string.permission_denied_explanation,
+                            Snackbar.LENGTH_LONG
+                        ).show()
+                    } else {
+                        //Never ask again selected, or device policy prohibits the app from having that permission.
+                        //So, disable that feature, or fall back to another situation...
+                        Snackbar.make(
+                            binding.mainLayout,
+                            R.string.permission_denied_explanation,
+                            Snackbar.LENGTH_LONG
+                        ).setAction(R.string.settings) {
+                            startActivity(Intent().apply {
+                                action = Settings.ACTION_APPLICATION_DETAILS_SETTINGS
+                                data = Uri.fromParts("package", BuildConfig.APPLICATION_ID, null)
+                                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                            })
+                        }.show()
+                    }
+                }
             }
-        }
+        }.onFailure { t -> Log.e(TAG, "Error in onRequestPermissionsResult(): ${t.message}") }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON) {
+        if (requestCode == REQUEST_TURN_DEVICE_LOCATION_ON)
             checkDeviceLocationSettings(false)
-        }
     }
 
-    private fun setMapStyle(map: GoogleMap) {
-        try {
-            map.setMapStyle(
+    private fun GoogleMap.setStyle() {
+        runCatching {
+            setMapStyle(
                 MapStyleOptions.loadRawResourceStyle(
                     requireContext(),
                     R.raw.map_style
                 )
             )
-        } catch (exc: Exception) {
-            Log.e(TAG, "Failed to parse map style!")
-        }
+        }.onFailure { Log.e(TAG, "Failed to parse map style!") }
     }
 
     @SuppressLint("MissingPermission")
@@ -154,11 +177,13 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
     }
 
     private fun onLocationSelected(poi: PointOfInterest) {
-        val latLng = poi.latLng
-        _viewModel.reminderSelectedLocationStr.value = poi.name
-        _viewModel.latitude.value = latLng.latitude
-        _viewModel.longitude.value = latLng.longitude
-        findNavController().popBackStack()
+        runCatching {
+            val latLng = poi.latLng
+            _viewModel.reminderSelectedLocationStr.value = poi.name
+            _viewModel.latitude.value = latLng.latitude
+            _viewModel.longitude.value = latLng.longitude
+            findNavController().popBackStack()
+        }.onFailure { t -> Log.e(TAG, "Error in onLocationSelected(): ${t.message}") }
     }
 
     @SuppressLint("MissingPermission")
@@ -192,22 +217,47 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
         }
         locationSettingsResponseTask.addOnCompleteListener {
             if (it.isSuccessful) {
-                googleMap.isMyLocationEnabled = true
+                runCatching {
+                    googleMap.isMyLocationEnabled = true
+                }.onFailure { t ->
+                    Log.e(TAG, "Failed to enable my location feature: ${t.message}")
+                }
             }
         }
     }
 
-    private fun pickPOI(map: GoogleMap) {
-        map.setOnPoiClickListener { poi ->
-            binding.saveLocationButton.visibility = View.VISIBLE
-            binding.saveLocationButton.setOnClickListener {
-                onLocationSelected(poi)
+    private fun GoogleMap.onPickPOI() {
+        runCatching {
+            setOnPoiClickListener { poi ->
+                binding.saveLocationButton.visibility = View.VISIBLE
+                binding.saveLocationButton.setOnClickListener {
+                    onLocationSelected(poi)
+                }
+                val poiMarker = addMarker(
+                    MarkerOptions().position(poi.latLng).title(poi.name)
+                )
+                poiMarker?.showInfoWindow()
             }
-            val poiMarker = map.addMarker(
-                MarkerOptions().position(poi.latLng).title(poi.name)
-            )
-            poiMarker?.showInfoWindow()
-        }
+        }.onFailure { t -> Log.e(TAG, "Error in onPickCustomLocation(): ${t.message}") }
+    }
+
+    private fun GoogleMap.onPickCustomLocation() {
+        runCatching {
+            setOnMapClickListener { latLng ->
+                binding.saveLocationButton.visibility = View.VISIBLE
+                binding.saveLocationButton.setOnClickListener {
+                    _viewModel.latitude.value = latLng.latitude
+                    _viewModel.longitude.value = latLng.longitude
+                    _viewModel.reminderSelectedLocationStr.value = "Using a Custom location"
+                    findNavController().popBackStack()
+                }
+
+                val cameraUpdate = CameraUpdateFactory.newLatLngZoom(latLng, 15f)
+                moveCamera(cameraUpdate)
+                val poiMarker = addMarker(MarkerOptions().position(latLng))
+                poiMarker?.showInfoWindow()
+            }
+        }.onFailure { t -> Log.e(TAG, "Error in onPickCustomLocation(): ${t.message}") }
     }
 
     private fun isPermissionGranted(): Boolean {
@@ -219,16 +269,20 @@ class SelectLocationFragment : BaseFragment(), OnMapReadyCallback {
 
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (isPermissionGranted()) {
-                googleMap.isMyLocationEnabled = true
-            } else {
-                requestPermissions(
-                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
-                    REQUEST_LOCATION_PERMISSION
-                )
-            }
-        } else googleMap.isMyLocationEnabled = true
-        checkDeviceLocationSettings()
+        runCatching {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                if (isPermissionGranted()) {
+                    googleMap.isMyLocationEnabled = true
+                } else {
+                    requestPermissions(
+                        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                        REQUEST_LOCATION_PERMISSION
+                    )
+                }
+            } else googleMap.isMyLocationEnabled = true
+            checkDeviceLocationSettings()
+        }.onFailure { t ->
+            Log.e(TAG, "Failed to enable my location feature: ${t.message}")
+        }
     }
 }
