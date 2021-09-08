@@ -1,16 +1,18 @@
 package com.udacity.project4
 
+import android.app.Activity
 import android.app.Application
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import androidx.test.espresso.Espresso
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.RootMatchers.withDecorView
 import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
+import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.LargeTest
 import androidx.test.rule.ActivityTestRule
@@ -22,6 +24,7 @@ import com.udacity.project4.locationreminders.reminderslist.RemindersListViewMod
 import com.udacity.project4.locationreminders.savereminder.SaveReminderViewModel
 import com.udacity.project4.util.DataBindingIdlingResource
 import com.udacity.project4.util.monitorActivity
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers.`is`
 import org.hamcrest.Matchers.not
@@ -51,10 +54,6 @@ class RemindersActivityTest :
      * As we use Koin as a Service Locator Library to develop our code, we'll also use Koin to test our code.
      * at this step we will initialize Koin related code to be able to use it in out testing.
      */
-
-    @Rule
-    @JvmField
-    var mActivityTestRule = ActivityTestRule(RemindersActivity::class.java)
 
     @Before
     fun init() {
@@ -97,41 +96,48 @@ class RemindersActivityTest :
         IdlingRegistry.getInstance().unregister(dataBindingIdlingResource)
     }
 
+    private fun getActivity(activityScenario: ActivityScenario<RemindersActivity>): Activity? {
+        var activity: Activity? = null
+        activityScenario.onActivity {
+            activity = it
+        }
+        return activity
+    }
+
     @Test
     fun addReminderEndToEndTest() = runBlocking {
         val activityScenario = ActivityScenario.launch(RemindersActivity::class.java)
 
         dataBindingIdlingResource.monitorActivity(activityScenario)
-        Espresso.onView(withId(R.id.noDataTextView))
-            .check(matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withId(R.id.addReminderFAB)).perform(ViewActions.click())
+        onView(withId(R.id.noDataTextView))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.addReminderFAB)).perform(click())
 
         // Try to save reminder without enter title
-        Espresso.onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withId(R.id.saveReminder)).perform(click())
         //Show SnackBar alert "Please enter title"
-        Espresso.onView(withId(com.google.android.material.R.id.snackbar_text))
+        onView(withId(com.google.android.material.R.id.snackbar_text))
             .check(matches(withText(R.string.err_enter_title)))
-
+        delay(2000)
         // Enter reminder title and save reminder
-        Espresso.onView(withId(R.id.reminderTitle))
+        onView(withId(R.id.reminderTitle))
             .perform(ViewActions.replaceText(appContext.getString(R.string.reminder_test_title)))
-        Espresso.onView(withId(R.id.reminderDescription))
+        onView(withId(R.id.reminderDescription))
             .perform(ViewActions.replaceText(appContext.getString(R.string.reminder_test_descreiption)))
-        Espresso.onView(withId(R.id.selectLocation)).perform(ViewActions.click())
-        Espresso.onView(withId(R.id.map)).perform(ViewActions.click())
-        Espresso.onView(withId(R.id.save_location_button)).perform(ViewActions.click())
+        onView(withId(R.id.selectLocation)).perform(click())
+        onView(withId(R.id.map)).perform(click())
+        onView(withId(R.id.save_location_button)).perform(click())
 
         // Validate EditText values
-        Espresso.onView(withText(appContext.getString(R.string.reminder_test_title)))
-            .check(matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withText(appContext.getString(R.string.reminder_test_descreiption)))
-            .check(matches(ViewMatchers.isDisplayed()))
-        Espresso.onView(withId(R.id.saveReminder)).perform(ViewActions.click())
+        onView(withText(appContext.getString(R.string.reminder_test_title)))
+            .check(matches(isDisplayed()))
+        onView(withText(appContext.getString(R.string.reminder_test_descreiption)))
+            .check(matches(isDisplayed()))
+        onView(withId(R.id.saveReminder)).perform(click())
 
         // Test Show Toast informing user "Reminder Saved !"
-        Espresso.onView(withText(R.string.reminder_saved))
-            .inRoot(withDecorView(not(`is`(mActivityTestRule.activity.window.decorView))))
-            .check(matches(ViewMatchers.isDisplayed()))
+        onView(withText(R.string.reminder_saved))
+            .inRoot(withDecorView(not((getActivity(activityScenario)?.window?.decorView)))).check(matches(isDisplayed()))
         activityScenario.close()
     }
 }
