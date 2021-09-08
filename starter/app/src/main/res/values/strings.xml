@@ -47,4 +47,42 @@
     <string name="reminder_test_descreiption">Android is an awesome operating system</string>
     <string name="reminder_test_location">Anywhere</string>
     <string name="choose_login_method">Choose Login Method</string>
+
+
+    <!--    Permissions Strings-->
+    <string
+        name="permission_rationale">Location permission needed for core functionality of the game.
+    </string>
+    <string
+        name="location_setting_off">Please turn on device location in Settings and try again.
+    </string>
+
+    <!--    Geofence Status Strings-->
+    <string name="geofences_added">Clue Geofence added.</string>
+    <string name="geofences_removed">Geofences removed.</string>
+    <string name="geofence_over">You have found the treasure! Congratulations!</string>
+
+    <!-- Geofence Hints -->
+    <string name="not_started_hint"> </string>
+    <string name="golden_gate_bridge_hint">Go to a bridge with a name that does not match the color that it is!</string>
+    <string name="ferry_building_hint">Go to a market with an amazing assortment of delicious foods. It is a San Francisco classic!</string>
+    <string name="pier_39_hint">Go to a pier popular for tourist attractions, carnival games, fresh fish, and delicious sourdough bread!</string>
+    <string name="union_square_hint">Go to a square named after Civil War rallies held there, but now known for its amazing shopping!</string>
+
+    <!-- Geofence Locations -->
+    <string name="golden_gate_bridge_location">at the Golden Gate bridge</string>
+    <string name="ferry_building_location">in the Ferry Building</string>
+    <string name="pier_39_location">at Pier 39</string>
+    <string name="union_square_location">in Union Square</string>
+
+    <string name="unknown_geofence_error">
+        Unknown error: the Geofence service is not available now
+    </string>
+
+    <string name="geofences_not_removed">Geofences not removed.</string>
+    <string name="insufficient_permissions">Insufficient permissions.</string>
+    <string name="geofence_error">There was an error in finding your treasure</string>
+
+    <!-- Content Description Strings -->
+    <string name="android_map_description">An Android robot with a map</string>
 </resources>

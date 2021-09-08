@@ -17,20 +17,20 @@ abstract class BaseFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
-        _viewModel.showErrorMessage.observe(this, {
+        _viewModel.showErrorMessage.observe(viewLifecycleOwner, {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
         })
-        _viewModel.showToast.observe(this, {
+        _viewModel.showToast.observe(viewLifecycleOwner, {
             Toast.makeText(activity, it, Toast.LENGTH_LONG).show()
         })
-        _viewModel.showSnackBar.observe(this, {
+        _viewModel.showSnackBar.observe(viewLifecycleOwner, {
             Snackbar.make(this.requireView(), it, Snackbar.LENGTH_LONG).show()
         })
-        _viewModel.showSnackBarInt.observe(this, {
+        _viewModel.showSnackBarInt.observe(viewLifecycleOwner, {
             Snackbar.make(this.requireView(), getString(it), Snackbar.LENGTH_LONG).show()
         })
 
-        _viewModel.navigationCommand.observe(this, { command ->
+        _viewModel.navigationCommand.observe(viewLifecycleOwner, { command ->
             when (command) {
                 is NavigationCommand.To -> findNavController().navigate(command.directions)
                 is NavigationCommand.Back -> findNavController().popBackStack()

@@ -1,12 +1,12 @@
 package com.udacity.project4.locationreminders.savereminder
 
 import android.app.Application
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.google.android.gms.maps.model.PointOfInterest
 import com.udacity.project4.R
 import com.udacity.project4.base.BaseViewModel
-import com.udacity.project4.base.NavigationCommand
 import com.udacity.project4.locationreminders.data.ReminderDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
 import com.udacity.project4.locationreminders.reminderslist.ReminderDataItem
@@ -21,6 +21,10 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     val selectedPOI = MutableLiveData<PointOfInterest?>()
     val latitude = MutableLiveData<Double?>()
     val longitude = MutableLiveData<Double?>()
+
+    private val _savedReminder = MutableLiveData<ReminderDTO>()
+    val savedReminder: LiveData<ReminderDTO>
+        get() = _savedReminder
 
     /**
      * Clear the live data objects to start fresh next time the view model gets called
@@ -37,14 +41,14 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
     /**
      * Validate the entered data then saves the reminder data to the DataSource
      */
-    fun validateAndSaveReminder(reminderData: ReminderDataItem): ReminderDTO? =
+    fun validateAndSaveReminder(reminderData: ReminderDataItem) {
         if (validateEnteredData(reminderData)) saveReminder(reminderData)
-        else null
+    }
 
     /**
      * Save the reminder to the data source
      */
-    fun saveReminder(reminderData: ReminderDataItem): ReminderDTO {
+    fun saveReminder(reminderData: ReminderDataItem) {
         val reminder = ReminderDTO(
             reminderData.title,
             reminderData.description,
@@ -66,10 +70,9 @@ class SaveReminderViewModel(val app: Application, private val dataSource: Remind
                 )
             )
             showLoading.value = false
+            _savedReminder.value = reminder
             showToast.value = app.getString(R.string.reminder_saved)
-            navigationCommand.value = NavigationCommand.Back
         }
-        return reminder
     }
 
     /**

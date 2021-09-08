@@ -3,10 +3,12 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/drawable/ic_baseline_login_24.xml" value="0.19895833333333332" />
         <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/drawable/ic_login.xml" value="0.20208333333333334" />
         <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/layout/activity_authentication.xml" value="0.3359375" />
         <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/layout/activity_reminder_description.xml" value="0.18177083333333333" />
         <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/layout/fragment_reminders.xml" value="0.1" />
+        <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/layout/fragment_save_reminder.xml" value="0.3359375" />
         <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/layout/fragment_select_location.xml" value="0.3359375" />
         <entry key="..\:/Training/Developing/Android/AndroidKotlinNanoDegree/Projects/nd940-android-kotlin-c4-starter/starter/app/src/main/res/layout/layout_auth_ui.xml" value="0.18177083333333333" />
       </map>
